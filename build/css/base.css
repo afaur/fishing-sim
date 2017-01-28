@@ -1,0 +1,34 @@
+.stage {
+  zoom: 0.5;
+}
+.stage {
+  width: 368px;
+  height: 1256px;
+  position: relative;
+}
+.stage .ic-fish,
+.stage .ic-catcharea,
+.stage .ic-gui {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.stage .progress {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 31px;
+  height: 10px;
+  background-color: orange;
+  transition: all 750ms ease;
+}
+.stage .reel-wrapper {
+  position: absolute;
+  height: 117px;
+  bottom: 138px;
+  left: 64px;
+  transform: rotate(0deg);
+}
+.props {
+  display: none;
+}

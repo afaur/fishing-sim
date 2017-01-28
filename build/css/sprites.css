@@ -1,0 +1,85 @@
+/*
+Icon classes can be used entirely standalone. They are named after their original file names.
+
+```html
+<i class="icon-home"></i>
+```
+*/
+.ic-blue {
+  background-image: url(/img/spritesheet.png);
+  background-position: -472px -214px;
+  width: 70px;
+  height: 1px;
+}
+.ic-catcharea {
+  background-image: url(/img/spritesheet.png);
+  background-position: -402px 0px;
+  width: 69px;
+  height: 351px;
+}
+.ic-fish {
+  background-image: url(/img/spritesheet.png);
+  background-position: -472px 0px;
+  width: 76px;
+  height: 76px;
+}
+.ic-green-dk {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -158px;
+  width: 31px;
+  height: 1px;
+}
+.ic-green-lt {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -156px;
+  width: 31px;
+  height: 1px;
+}
+.ic-green-md {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -152px;
+  width: 31px;
+  height: 1px;
+}
+.ic-gui {
+  background-image: url(/img/spritesheet.png);
+  background-position: 0px 0px;
+  width: 368px;
+  height: 1256px;
+}
+.ic-orange {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -150px;
+  width: 31px;
+  height: 1px;
+}
+.ic-progress {
+  background-image: url(/img/spritesheet.png);
+  background-position: -369px 0px;
+  width: 32px;
+  height: 1152px;
+}
+.ic-red {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -154px;
+  width: 31px;
+  height: 1px;
+}
+.ic-reel {
+  background-image: url(/img/spritesheet.png);
+  background-position: -472px -150px;
+  width: 24px;
+  height: 63px;
+}
+.ic-seaweed {
+  background-image: url(/img/spritesheet.png);
+  background-position: -472px -77px;
+  width: 70px;
+  height: 72px;
+}
+.ic-yellow {
+  background-image: url(/img/spritesheet.png);
+  background-position: -497px -160px;
+  width: 31px;
+  height: 1px;
+}

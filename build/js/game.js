@@ -1,3 +1,20 @@
+class EventEmitter {
+  constructor() {
+    this.events = []
+  }
+  emit(type, ...args) {
+    this.events.forEach(function(event) {
+      if (event.type === type) { event.callback(...args) }
+    })
+  }
+  on(type, callback) {
+    this.events.push({
+      type,
+      callback
+    })
+  }
+}
+
 class Reel {
   constructor(el, options = {}) {
     this.el = el
@@ -61,7 +78,7 @@ class Fish {
   }
 }
 
-class CatchArea {
+class FishNet {
   constructor(el, options = {}) {
     this.el = el
     this.el.style.left = '170px'
@@ -77,6 +94,6 @@ class CatchArea {
 }
 
 const fish = new Fish(document.querySelector('.ic-fish'), {})
-const catcharea = new CatchArea(document.querySelector('.ic-catcharea'), {})
+const fishNet = new FishNet(document.querySelector('.ic-fishnet'), {})
 const progress = new Progress(document.querySelector('.progress'), {})
 const reel = new Reel(document.querySelector('.reel-wrapper'), {})

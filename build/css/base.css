@@ -7,7 +7,7 @@
   position: relative;
 }
 .stage .ic-fish,
-.stage .ic-catcharea,
+.stage .ic-fishnet,
 .stage .ic-gui {
   position: absolute;
   top: 0;

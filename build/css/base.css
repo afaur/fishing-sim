@@ -13,6 +13,12 @@
   top: 0;
   left: 0;
 }
+.stage .ic-fish {
+  transition: all 750ms ease;
+}
+.stage .ic-fishnet {
+  transition: all 70ms ease;
+}
 .stage .progress {
   position: absolute;
   bottom: 0;

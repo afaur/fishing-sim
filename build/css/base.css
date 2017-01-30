@@ -7,6 +7,11 @@
   position: relative;
   border: 1px solid black;
 }
+#stage .title {
+  font-size: 50px;
+  text-align: center;
+  margin-top: 300px;
+}
 #stage .ic-fish,
 #stage .ic-fishnet,
 #stage .ic-gui {
@@ -15,10 +20,10 @@
   left: 0;
 }
 #stage .ic-fish {
-  transition: all 750ms ease;
+  transition: all 100ms ease;
 }
 #stage .ic-fishnet {
-  transition: all 70ms ease;
+  transition: all 100ms ease;
 }
 #stage .progress {
   position: absolute;
@@ -27,7 +32,7 @@
   width: 31px;
   height: 10px;
   background-color: orange;
-  transition: all 750ms ease;
+  transition: all 100ms ease;
 }
 #stage .reel-wrapper {
   position: absolute;

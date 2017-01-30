@@ -1,3 +1,11 @@
+function number (min, max) {
+  if (max === null) {
+    max = min
+    min = 0
+  }
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
 class EventEmitter {
   constructor() {
     this.events = []
@@ -58,21 +66,58 @@ class LoadingScene extends Scene {
   }
 }
 
+class WonScene extends Scene {
+  constructor () {
+    super()
+    this.title = new Title({text: 'You won!'})
+    this.start = new StartButton({})
+    this.start.on('start', () => {
+      window.game.setScene(GameScene)
+    })
+  }
+}
+
+class LostScene extends Scene {
+  constructor () {
+    super()
+    this.title = new Title({text: 'You lost! ]:'})
+    this.start = new StartButton({})
+    this.start.on('start', () => {
+      window.game.setScene(GameScene)
+    })
+  }
+}
+
 class GameScene extends Scene {
   constructor () {
     super()
-    this.game = {
-      gameGUI: new GameGUI({}),
-      fishNet: new FishNet({}),
-      fish: new Fish({}),
-      progress: new Progress({}),
-      reel: new Reel({}),
-    }
+    this.gameGUI = new GameGUI({})
+    this.fishNet = new FishNet({})
+    this.fish = new Fish({})
+    this.progress = new Progress({})
+    this.reel = new Reel({})
+    this.isCatching = false
+    this.fishNet.on('on', () => {
+      this.isCatching = true
+    })
+    this.fishNet.on('off', () => {
+      this.isCatching = false
+    })
+    this.progress.on('full', () => {
+      window.game.setScene(WonScene)
+    })
+    this.progress.on('empty', () => {
+      window.game.setScene(LostScene)
+    })
   }
 
   update () {
-    this.game.fish.update()
-    this.game.fishNet.update()
+    this.fish.update()
+    this.fishNet.update({
+      fishTop: this.fish.el.style.top,
+      fishHeight: this.fish.el.style.height,
+    })
+    this.progress.update(this.isCatching)
   }
 }
 
@@ -114,13 +159,24 @@ class Progress extends Entity {
     this.floor = options.floor || 0
     this.set(options.value || 0)
   }
-  set(value) {
+  set (value) {
+    if (value > 1) { value = 1 }
+    if (value < 0) { value = 0 }
     if (value <= 1) { this.el.style.backgroundColor = 'green' }
     if (value <= 0.75) { this.el.style.backgroundColor = 'lightgreen' }
     if (value <= 0.5) { this.el.style.backgroundColor = 'orange' }
     if (value <= 0.25) { this.el.style.backgroundColor = 'red' }
-    this.value = (this.ceil - this.floor) * value
-    this.el.style.height = this.value + 'px'
+    if (value === 1) {
+      this.emit('full')
+    } else if (value === 0) {
+      this.emit('empty')
+    }
+    this.value = value
+    this.position = (this.ceil - this.floor) * value
+    this.el.style.height = this.position + 'px'
+  }
+  update (state) {
+    this.set( state ? this.value + 0.02 : this.value - 0.02 )
   }
 }
 
@@ -139,6 +195,13 @@ class StartButton extends Entity {
   }
 }
 
+class Title extends Entity {
+  constructor ({ text }) {
+    super('title')
+    this.el.innerText = text
+  }
+}
+
 class Fish extends Entity {
   constructor(options = {}) {
     super('ic-fish')
@@ -146,15 +209,22 @@ class Fish extends Entity {
     this.ceil = options.ceil || 55
     this.floor = options.floor || 1100
     this.set(options.value || 0)
+    this.goingUp = true
   }
   set(value) {
+    if (value >= 1) { value = 1 }
+    if (value <= 0) { value = 0 }
     const revValue = Math.abs(value - 1)
-    this.value = ((this.floor - this.ceil) * revValue) + this.ceil
-    this.el.style.top = this.value + 'px'
+    this.value = value
+    this.position = ((this.floor - this.ceil) * revValue) + this.ceil
+    this.el.style.top = this.position + 'px'
   }
   update () {
-    let random = Math.random()
-    this.set(random)
+    if (number(1, 10) === 1 || this.value === 1 || this.value === 0) {
+      this.goingUp = !this.goingUp
+    }
+    const random = number(1, 10) / 200
+    this.set(this.value + (this.goingUp ? random * -1 : random))
   }
 }
 
@@ -185,11 +255,12 @@ class FishNet extends Entity {
     this.el.style.top = position + 'px'
   }
 
-  get () {
-    return this.value
-  }
-
-  update () {
+  update ({ fishHeight, fishTop }) {
+    fishTop = parseInt(fishTop, 10)
+    const height = this.el.offsetHeight
+    const top = parseInt(this.el.style.top, 10)
+    const on = (fishTop < (height + top) && fishTop > top)
+    this.emit(on ? 'on' : 'off')
     var time = Math.round(performance.now()) - this.start
     var diff  = (time + 100) / 2000
     if (this.clicking) {

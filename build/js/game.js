@@ -278,9 +278,10 @@ class Game {
   }
 
   setScene (obj) {
+    this.scene = null
     const stage = document.getElementById('stage')
-    for (let child of stage.children) {
-      stage.removeChild(child)
+    while (stage.hasChildNodes()) {
+      stage.removeChild(stage.lastChild)
     }
     this.scene = new obj()
   }

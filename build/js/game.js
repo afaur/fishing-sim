@@ -15,83 +15,75 @@ class EventEmitter {
   }
 }
 
-class Stage {
-  constructor(gameObjects) {
-    this.game = gameObjects
+class Scene { }
+class Entity extends EventEmitter { }
+
+class Sound {
+  constructor (name) {
+    this.myAudio = new Audio('./audio/' + name + '.wav')
+    this.myAudio.volume = 0.25
+    this.myAudio.addEventListener('ended', () => {
+        this.currentTime = 0
+        this.play()
+    }, false)
+  }
+
+  play () {
+    this.myAudio.play()
+  }
+
+  pause () {
+    this.myAudio.pause()
+  }
+}
+
+class GameScene extends Scene {
+  constructor () {
+    super()
+    this.game = {
+      fish: new Fish(document.querySelector('.ic-fish'), {}),
+      fishNet: new FishNet(document.querySelector('.ic-fishnet'), {}),
+      progress: new Progress(document.querySelector('.progress'), {}),
+      reel: new Reel(document.querySelector('.reel-wrapper'), {}),
+    }
     this.started = false
-    this.fishNetMovingUp = false
     this.fishInterval = null
-    this.fishNetInterval = null
-    this.fishNetVelocity = 0.02
     this.pageBody = document.getElementById("body")
     this.playButton = document.getElementById("playButton")
     this.endButton = document.getElementById("endButton")
-    this.pageBody.onclick = (evt) => {
-      if ( evt.target.id === 'playButton' || evt.target.id === 'endButton' ) {
-      } else {
-        if ( this.started === true && this.fishNetMovingUp === false ) {
-          this.pushUpNet()
-        }
-      }
-    }
     this.playButton.onclick = (evt) => {
       evt.preventDefault()
+      evt.stopPropagation()
       this.play()
     }
     this.endButton.onclick = (evt) => {
       evt.preventDefault()
+      evt.stopPropagation()
       this.end()
     }
-    this.game.fishNet.set(0)
   }
-  play() {
-    if (this.fishInterval) { clearInterval(this.fishInterval) }
-    if (this.fishNetInterval) { clearInterval(this.fishNetInterval) }
-    this.fishInterval = setInterval(() => {
-      let random = Math.random()
-      this.game.fish.set(random)
-    }, 2000)
-    this.fishNetInterval = setInterval(() => {
-      if ( this.fishNetMovingUp === false ) {
-        let current = this.game.fishNet.get()
-        let velocity = this.fishNetVelocity
-        if ( (current - velocity) > 0 ) {
-          this.game.fishNet.set(current - velocity)
-        } else {
-          this.game.fishNet.set(0)
-        }
-      }
-    }, 100)
+
+  update () {
+    if (this.started) {
+      this.game.fish.update()
+      this.game.fishNet.update()
+    }
+  }
+  
+  play () {
     this.started = true
   }
+
   end() {
-    clearInterval(this.fishInterval)
-    clearInterval(this.fishNetInterval)
+    this.started = false
     this.game.fish.set(0)
     this.game.fishNet.set(0)
-    this.started = false
-  }
-  pushUpNet() {
-    if ( this.fishNetMovingUp === false ) {
-      if ( (this.game.fishNet.get() + 0.05) < 1 ) {
-        this.game.fishNet.set( this.game.fishNet.get() + 0.05 )
-        this.fishNetMovingUp = true
-        setTimeout(() => {
-          this.fishNetMovingUp = false
-        }, 100)
-      } else {
-        this.game.fishNet.set(1)
-      }
-      this.fishNetMovingUp = true
-      setTimeout(() => {
-        this.fishNetMovingUp = false
-      }, 100)
-    }
   }
 }
 
-class Reel {
+class Reel extends Entity {
   constructor(el, options = {}) {
+    super()
     this.el = el
     this.degree = 0
     this.speed = options.initialSpeed || 50
@@ -119,8 +111,9 @@ class Reel {
   }
 }
 
-class Progress {
+class Progress extends Entity {
   constructor(el, options = {}) {
+    super()
     this.el = el
     this.el.style.bottom = '59px'
     this.el.style.right = '49px'
@@ -138,8 +131,9 @@ class Progress {
   }
 }
 
-class Fish {
+class Fish extends Entity {
   constructor(el, options = {}) {
+    super()
     this.el = el
     this.el.style.left = '165px'
     this.ceil = options.ceil || 55
@@ -151,32 +145,66 @@ class Fish {
     this.value = ((this.floor - this.ceil) * revValue) + this.ceil
     this.el.style.top = this.value + 'px'
   }
+  update () {
+    let random = Math.random()
+    this.set(random)
+  }
 }
 
-class FishNet {
+class FishNet extends Entity {
   constructor(el, options = {}) {
+    super()
     this.el = el
     this.el.style.left = '170px'
     this.ceil = options.ceil || 55
     this.floor = options.floor || 835
     this.set(options.value || 0)
+    document.body.addEventListener('mousedown', () => {
+      this.start = Math.round(performance.now())
+      this.clicking = true
+    })
+    document.body.addEventListener('mouseup', () => {
+      this.start = Math.round(performance.now())
+      this.clicking = false
+    })
   }
+
   set (value) {
+    if (value >= 1) { value = 1 }
+    if (value <= 0) { value = 0 }
     this.value = value
-    const revValue = Math.abs(value - 1)
-    this.position = ((this.floor - this.ceil) * revValue) + this.ceil
-    this.el.style.top = this.position + 'px'
+    const revValue = Math.abs(this.value - 1)
+    const position = ((this.floor - this.ceil) * revValue) + this.ceil
+    this.el.style.top = position + 'px'
   }
+
   get () {
     return this.value
   }
+
+  update () {
+    var time = Math.round(performance.now()) - this.start
+    var diff  = (time + 100) / 2000
+    if (this.clicking) {
+      this.set(this.value + diff)
+    } else {
+      this.set(this.value - diff)
+    }
+  }
 }
 
-const fish = new Fish(document.querySelector('.ic-fish'), {})
-const fishNet = new FishNet(document.querySelector('.ic-fishnet'), {})
-const progress = new Progress(document.querySelector('.progress'), {})
-const reel = new Reel(document.querySelector('.reel-wrapper'), {})
+class Game {
+  constructor (fps) {
+    this.fps = fps || 10
+  }
 
-const stage = new Stage({
-  fish, fishNet, progress, reel
-})
+  run () {
+    const stage = new GameScene()
+    const time = Math.round(1000 / this.fps)
+    setInterval(() => {
+      stage.update()
+    }, time)
+  }
+}
+
+new Game().run()

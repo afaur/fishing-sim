@@ -15,16 +15,27 @@ class EventEmitter {
   }
 }
 
-class Scene { }
-class Entity extends EventEmitter { }
+class Scene {
+  update () {}
+}
+
+class Entity extends EventEmitter {
+  constructor (className) {
+    super()
+    const el = document.createElement('div')
+    el.className = className
+    document.getElementById('stage').appendChild(el)
+    this.el = el
+  }
+}
 
 class Sound {
   constructor (name) {
     this.myAudio = new Audio('./audio/' + name + '.wav')
     this.myAudio.volume = 0.25
     this.myAudio.addEventListener('ended', () => {
-        this.currentTime = 0
-        this.play()
+      this.currentTime = 0
+      this.play()
     }, false)
   }
 
@@ -37,54 +48,37 @@ class Sound {
   }
 }
 
+class LoadingScene extends Scene {
+  constructor () {
+    super()
+    this.start = new StartButton({})
+    this.start.on('start', () => {
+      window.game.setScene(GameScene)
+    })
+  }
+}
+
 class GameScene extends Scene {
   constructor () {
     super()
     this.game = {
-      fish: new Fish(document.querySelector('.ic-fish'), {}),
-      fishNet: new FishNet(document.querySelector('.ic-fishnet'), {}),
-      progress: new Progress(document.querySelector('.progress'), {}),
-      reel: new Reel(document.querySelector('.reel-wrapper'), {}),
-    }
-    this.started = false
-    this.fishInterval = null
-    this.pageBody = document.getElementById("body")
-    this.playButton = document.getElementById("playButton")
-    this.endButton = document.getElementById("endButton")
-    this.playButton.onclick = (evt) => {
-      evt.preventDefault()
-      evt.stopPropagation()
-      this.play()
-    }
-    this.endButton.onclick = (evt) => {
-      evt.preventDefault()
-      evt.stopPropagation()
-      this.end()
+      gameGUI: new GameGUI({}),
+      fishNet: new FishNet({}),
+      fish: new Fish({}),
+      progress: new Progress({}),
+      reel: new Reel({}),
     }
   }
 
   update () {
-    if (this.started) {
-      this.game.fish.update()
-      this.game.fishNet.update()
-    }
-  }
-  
-  play () {
-    this.started = true
-  }
-
-  end() {
-    this.started = false
-    this.game.fish.set(0)
-    this.game.fishNet.set(0)
+    this.game.fish.update()
+    this.game.fishNet.update()
   }
 }
 
 class Reel extends Entity {
-  constructor(el, options = {}) {
-    super()
-    this.el = el
+  constructor(options = {}) {
+    super('reel-wrapper')
     this.degree = 0
     this.speed = options.initialSpeed || 50
     this.playing = false
@@ -112,9 +106,8 @@ class Reel extends Entity {
 }
 
 class Progress extends Entity {
-  constructor(el, options = {}) {
-    super()
-    this.el = el
+  constructor(options = {}) {
+    super('progress')
     this.el.style.bottom = '59px'
     this.el.style.right = '49px'
     this.ceil = options.ceil || 1147
@@ -131,10 +124,24 @@ class Progress extends Entity {
   }
 }
 
+class GameGUI extends Entity {
+  constructor () {
+    super('ic-gui')
+  }
+}
+
+class StartButton extends Entity {
+  constructor () {
+    super('start-button')
+    this.el.addEventListener('click', () => {
+      this.emit('start')
+    })
+  }
+}
+
 class Fish extends Entity {
-  constructor(el, options = {}) {
-    super()
-    this.el = el
+  constructor(options = {}) {
+    super('ic-fish')
     this.el.style.left = '165px'
     this.ceil = options.ceil || 55
     this.floor = options.floor || 1100
@@ -152,9 +159,9 @@ class Fish extends Entity {
 }
 
 class FishNet extends Entity {
-  constructor(el, options = {}) {
-    super()
-    this.el = el
+  constructor(options = {}) {
+    super('ic-fishnet')
+    this.start = 0
     this.el.style.left = '170px'
     this.ceil = options.ceil || 55
     this.floor = options.floor || 835
@@ -196,15 +203,27 @@ class FishNet extends Entity {
 class Game {
   constructor (fps) {
     this.fps = fps || 10
+    this.scene = null
+  }
+
+  setScene (obj) {
+    const stage = document.getElementById('stage')
+    for (let child of stage.children) {
+      stage.removeChild(child)
+    }
+    this.scene = new obj()
   }
 
   run () {
-    const stage = new GameScene()
     const time = Math.round(1000 / this.fps)
     setInterval(() => {
-      stage.update()
+      if (this.scene) {
+        this.scene.update()
+      }
     }, time)
   }
 }
 
-new Game().run()
+window.game = new Game()
+window.game.setScene(LoadingScene)
+window.game.run()

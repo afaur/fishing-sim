@@ -1,25 +1,26 @@
-.stage {
+#stage {
   zoom: 0.5;
 }
-.stage {
+#stage {
   width: 368px;
   height: 1256px;
   position: relative;
+  border: 1px solid black;
 }
-.stage .ic-fish,
-.stage .ic-fishnet,
-.stage .ic-gui {
+#stage .ic-fish,
+#stage .ic-fishnet,
+#stage .ic-gui {
   position: absolute;
   top: 0;
   left: 0;
 }
-.stage .ic-fish {
+#stage .ic-fish {
   transition: all 750ms ease;
 }
-.stage .ic-fishnet {
+#stage .ic-fishnet {
   transition: all 70ms ease;
 }
-.stage .progress {
+#stage .progress {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -28,12 +29,32 @@
   background-color: orange;
   transition: all 750ms ease;
 }
-.stage .reel-wrapper {
+#stage .reel-wrapper {
   position: absolute;
   height: 117px;
   bottom: 138px;
   left: 64px;
   transform: rotate(0deg);
+}
+#stage .start-button {
+  display: block;
+  width: 200px;
+  margin: 600px auto;
+}
+#stage .start-button:before {
+  display: block;
+  content: 'Start Game';
+  font-size: 32px;
+  background-color: lightblue;
+  border: 3px solid blue;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+#stage .start-button:hover:before {
+  background-color: blue;
+  color: white;
+  cursor: pointer;
 }
 .props {
   display: none;
